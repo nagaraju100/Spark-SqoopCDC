@@ -61,8 +61,14 @@ Let our original table be called Customers. After sqoop operation there will be 
   
   `sqlContext.sql(sql)`
   
- 3) Insert data into customers_updated
+ 3) Get exisiting_records_without_recent_query
  
- `sql = "INSERT INTO TABLE customer_update_spark SELECT a.cust_no, a.birth_date, a.first_name, a.last_name, a.gender, a.join_date, a.created_date, a.modified_date FROM customer a LEFT OUTER JOIN customer_extract b ON a.cust_no = b.cust_no WHERE b.cust_no IS NULL"`
+ `exisiting_records_without_recent_query = "create table db.exisiting_records_without_recent_query as SELECT a.cust_no, a.birth_date, a.first_name, a.last_name, a.gender, a.join_date, a.created_date, a.modified_date FROM customer a LEFT OUTER JOIN customer_extract b ON a.cust_no = b.cust_no WHERE b.cust_no IS NULL"`
  
- `sqlContext.sql(sql)`
+ `spark.sql(exisiting_records_without_recent_query)`
+ 
+ 4) Now Update the customers table with new data and exisiting_records_without_recent_query
+
+ `  final_query = insert over customers select a.* from (select * from customer_extract union all select * from exisiting_records_without_recent_query) a `
+
+  `spark.sql(final_query)`
